@@ -1,6 +1,6 @@
 [[source]]
 name = "pypi"
-url = "https://pypi.org/simple"
+url = "http://mirrors.aliyun.com/pypi/simple/"
 verify_ssl = false
 
 [dev-packages]
@@ -9,6 +9,11 @@ verify_ssl = false
 flask = "*"
 blueprint = "*"
 python-dotenv = "*"
+opencv-python = "*"
+numpy = "*"
+scikit-learn = "*"
+dlib = "*"
+pandas = "*"
 
 [requires]
 python_version = "3.7"
