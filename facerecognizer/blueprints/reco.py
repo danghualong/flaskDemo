@@ -13,11 +13,10 @@ def checkIn():
         if file:
             # save file to tmp file
             filePath=fileUtil.saveFile(file)
-            print(filePath)
-            person=reco.recognize(filePath)
-            if(person==None):
+            persons=reco.recognize(filePath)
+            if(persons==None):
                 return jsonify({'error':'inner error','code':702})    
-            return jsonify(person)
+            return jsonify(persons)
         else:
             return jsonify({'error':'上传文件不存在','code':601})
     except Exception as ex:

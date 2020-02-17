@@ -1,6 +1,6 @@
 import os
 
-FILE_TMP_PATH='facerecognizer/tmpimgs'
+FILE_TMP_PATH='facerecognizer\\tmpimgs'
 
 def saveFile(imgFile):
     if(not os.path.exists(FILE_TMP_PATH)):
