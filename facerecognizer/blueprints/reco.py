@@ -20,13 +20,14 @@ def uploadimg():
         print(ex.args)
         return jsonify({'error':'上传参数有误','code':901})
 
-@reco_bp.route('/identity/<imgpath>',methods=['POST'])
-def checkIn(imgpath):
+@reco_bp.route('/identity/<img_name>',methods=['POST'])
+def checkIn(img_name):
     try:
-        if imgPath:
+        if img_name:
+            imgPath=fileUtil.getFullPath(img_name)
             persons=reco.recognize(imgPath)
             if(persons==None):
-                return jsonify({'error':'inner error','code':702})    
+                return jsonify({'error':'inner error','code':702})
             return jsonify(persons)
         else:
             return jsonify({'error':'上传文件不存在','code':601})
