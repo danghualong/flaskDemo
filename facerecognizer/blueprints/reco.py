@@ -36,5 +36,7 @@ def checkIn(img_name):
         return jsonify({'error':'上传参数有误','code':901})
 
 
-
+@reco_bp.route('/test',methods=['GET','POST'])
+def test():
+    return jsonify({'content':'this is test api'})
     
