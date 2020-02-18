@@ -1,7 +1,6 @@
-from flask import Flask,jsonify
+from flask import Flask
 from facerecognizer.blueprints.admin import admin_bp
 from facerecognizer.blueprints.reco import reco_bp
-from facerecognizer.status import Status
 
 
 
