@@ -4,6 +4,8 @@ import pandas as pd
 import math
 import traceback
 import numpy as np
+from facerecognizer.status import Status
+from facerecognizer.models.abnormal_result import AbnormalResult
 
 
 FEATURE_DB_PATH='facerecognizer/faces/feature/features2_all.csv'
@@ -28,8 +30,7 @@ def recognize(imgPath):
     try:
         img,rects=getFaceRegions(imgPath)
         if(len(rects)==0):
-            print('no found face')
-            return None
+            return AbnormalResult(Status.NO_FOUND_FACE,'not found face region')
         for i in range(len(rects)):
             feature=return_128d_features(img,rects[i])
             person=getDistances(feature)
@@ -37,7 +38,7 @@ def recognize(imgPath):
     except Exception as ex:
         print(ex.args)
         print(traceback.format_exc())
-        return None
+        return AbnormalResult(Status.INTERNAL_ERROR,ex.args)
     return persons
 # 截取人脸区域，并保存到文件
 def getFaceRegions(imgPath):
@@ -66,7 +67,7 @@ def return_128d_features(img,region):
 
 # 获取特征与库中所有内容的距离
 def getDistances(feature):
-    person=None
+    retName=None
     minDistance=math.inf
     df=pd.read_csv(FEATURE_DB_PATH)
     for personName in df.columns:
@@ -74,9 +75,9 @@ def getDistances(feature):
         baseFeat=np.array(baseFeat)
         distance=np.sqrt(np.sum(np.power(feature-baseFeat,2)))
         if(distance<minDistance):
-            person={'name':personName,'distance':distance}
+            retName=personName
             minDistance=distance
-    if(person['distance']>DISTANCE_THRESHOLD):
-        person['name']='Unknown'
-        del person['distance']
-    return person
+    if(minDistance>DISTANCE_THRESHOLD):
+        return {'name':'Unknown'}
+    else:
+        return {'name':retName,'distance':minDistance}
