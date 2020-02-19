@@ -81,3 +81,11 @@ def getDistances(feature):
         return {'name':'Unknown'}
     else:
         return {'name':retName,'distance':minDistance}
+
+
+def compare(targetPath,followupPath):
+    pass
+
+def compareDistance(feature1,feature2):
+    distance=np.sqrt(np.sum(np.power(feature1-feature2,2)))
+    return distance

@@ -45,3 +45,20 @@ def checkIn(img_name):
     finally:
         if(os.path.exists(imgPath)):
             os.remove(imgPath)
+
+@reco_bp.route('/compare/<target_name>/<followup_name>',methods=['POST'])
+def compare(target_name,followup_name):
+    try:
+        targetPath=fileUtil.getFullPath(target_name)
+        followupPath=fileUtil.getFullPath(followup_name)
+        if(not (os.path.exists(targetPath) and os.path.exists(followupPath))):
+            # return jsonify({'code':Status.NO_IMAGE,'message':'文件不存在'}),Status.BUSINESS_ERROR_CODE
+            return jsonify(AbnormalResult(Status.NO_IMAGE,'文件不存在').__dict__),Status.BUSINESS_ERROR_CODE
+        result=reco.compare(targetPath,followupPath)
+        if(type(result).__name__==AbnormalResult.__name__):
+            return jsonify(result.__dict__),Status.BUSINESS_ERROR_CODE
+        else:
+            return jsonify({'code':Status.OK,'content':result})
+    except Exception as ex:
+        print(ex.args)
+        return jsonify(AbnormalResult(Status.PARAMETER_ERROR,ex.args).__dict__)
