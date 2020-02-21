@@ -81,11 +81,42 @@ def getDistances(feature):
         return {'name':'Unknown'}
     else:
         return {'name':retName,'distance':minDistance}
-
-
 def compare(targetPath,followupPath):
-    pass
-
-def compareDistance(feature1,feature2):
-    distance=np.sqrt(np.sum(np.power(feature1-feature2,2)))
+    try:
+        targetFeatures=getimageFeatures(targetPath)
+        if(targetFeatures==None):
+            return AbnormalResult(Status.NO_FOUND_FACE,'not found control face')
+        followupFeatures=getimageFeatures(followupPath)
+        if(followupFeatures==None):
+            return AbnormalResult(Status.NO_FOUND_FACE,'not found test face')
+        minDistance=math.inf
+        for feat1 in targetFeatures:
+            for feat2 in followupFeatures:
+                distance=calcDistance(feat1,feat2)
+                minDistance=distance if distance<minDistance else minDistance
+        similarity=getSimilarity(minDistance)
+    except Exception as ex:
+        print(ex.args)
+        print(traceback.format_exc())
+        return AbnormalResult(Status.INTERNAL_ERROR,ex.args)
+    return {'score':similarity}
+def getimageFeatures(imgPath):
+    features=[]
+    img,rects=getFaceRegions(imgPath)
+    if(len(rects)==0):
+        return None
+    for i in range(len(rects)):
+        feature=return_128d_features(img,rects[i])
+        features.append(feature)
+    return features
+def calcDistance(feature1,feature2):
+    feat1=np.array(feature1)
+    feat2=np.array(feature2)
+    distance=np.sqrt(np.sum(np.power(feat1-feat2,2)))
     return distance
+def getSimilarity(distance):
+    # 自定义公式(待商榷)
+    score=1/(1+math.pow(math.e,6*distance-2.4))+0.2
+    if(score>1):
+        score=1.00
+    return score

@@ -58,6 +58,8 @@ def compare(target_name,followup_name):
         if(type(result).__name__==AbnormalResult.__name__):
             return jsonify(result.__dict__),Status.BUSINESS_ERROR_CODE
         else:
+            result['target']=target_name
+            result['followup']=followup_name
             return jsonify({'code':Status.OK,'content':result})
     except Exception as ex:
         print(ex.args)
