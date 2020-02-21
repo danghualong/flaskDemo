@@ -81,25 +81,30 @@ def getDistances(feature):
         return {'name':'Unknown'}
     else:
         return {'name':retName,'distance':minDistance}
-def compare(targetPath,followupPath):
+
+def compare(targetPath,followupPaths):
     try:
         targetFeatures=getimageFeatures(targetPath)
         if(targetFeatures==None):
             return AbnormalResult(Status.NO_FOUND_FACE,'not found control face')
-        followupFeatures=getimageFeatures(followupPath)
-        if(followupFeatures==None):
-            return AbnormalResult(Status.NO_FOUND_FACE,'not found test face')
-        minDistance=math.inf
-        for feat1 in targetFeatures:
-            for feat2 in followupFeatures:
-                distance=calcDistance(feat1,feat2)
-                minDistance=distance if distance<minDistance else minDistance
-        similarity=getSimilarity(minDistance)
+        results=[]
+        for followupPath in followupPaths:
+            followupFeatures=getimageFeatures(followupPath)
+            if(followupFeatures==None):
+                results.append({'score':-1})
+                continue       
+            minDistance=math.inf
+            for feat1 in targetFeatures:
+                for feat2 in followupFeatures:
+                    distance=calcDistance(feat1,feat2)
+                    minDistance=distance if distance<minDistance else minDistance
+            similarity=getSimilarity(minDistance)
+            results.append({'score':similarity})
     except Exception as ex:
         print(ex.args)
         print(traceback.format_exc())
         return AbnormalResult(Status.INTERNAL_ERROR,ex.args)
-    return {'score':similarity}
+    return results
 def getimageFeatures(imgPath):
     features=[]
     img,rects=getFaceRegions(imgPath)

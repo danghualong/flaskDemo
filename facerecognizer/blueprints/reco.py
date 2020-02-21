@@ -64,3 +64,40 @@ def compare(target_name,followup_name):
     except Exception as ex:
         print(ex.args)
         return jsonify(AbnormalResult(Status.PARAMETER_ERROR,ex.args).__dict__)
+
+@reco_bp.route('/uploadimgs',methods=['POST'])
+def uploadimgs():
+    try:
+        files = request.files.getlist('upload')
+        if files:
+            paths=[]
+            for file in files:
+                # save file to tmp file
+                filePath=fileUtil.saveFile(file)
+                paths.append(filePath)
+            return jsonify({'code':Status.OK,'content':{'filenames':paths}})
+        else:
+            return jsonify({'code':Status.NO_IMAGE,'message':'没有上传图片'}),Status.BUSINESS_ERROR_CODE
+    except Exception as ex:
+        print(ex.args)
+        return jsonify({'code':Status.PARAMETER_ERROR,'message':ex.args}),Status.BUSINESS_ERROR_CODE
+
+@reco_bp.route('/compare',methods=['POST'])
+def compare():
+    try:
+        data=request.get_json('data')
+        target_name=data.get('control')
+        followup_names=data.get('tests')
+        targetPath=fileUtil.getFullPath(target_name)
+        if(not os.path.exists(targetPath)):
+            return jsonify(AbnormalResult(Status.NO_IMAGE,'文件不存在').__dict__),Status.BUSINESS_ERROR_CODE
+        followupPaths=[fileUtil.getFullPath(followup_name) for followup_name in followup_names]
+        result=reco.compare(targetPath,followupPaths)
+        if(type(result).__name__==AbnormalResult.__name__):
+            return jsonify(result.__dict__),Status.BUSINESS_ERROR_CODE
+        else:
+            return jsonify({'code':Status.OK,'content':result})
+    except Exception as ex:
+        print(ex.args)
+        return jsonify(AbnormalResult(Status.PARAMETER_ERROR,ex.args).__dict__)
+
