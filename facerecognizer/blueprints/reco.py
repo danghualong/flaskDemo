@@ -46,8 +46,8 @@ def checkIn(img_name):
         if(os.path.exists(imgPath)):
             os.remove(imgPath)
 
-@reco_bp.route('/compare/<target_name>/<followup_name>',methods=['POST'])
-def compare(target_name,followup_name):
+@reco_bp.route('/compare2/<target_name>/<followup_name>',methods=['POST'])
+def compare2(target_name,followup_name):
     try:
         targetPath=fileUtil.getFullPath(target_name)
         followupPath=fileUtil.getFullPath(followup_name)
