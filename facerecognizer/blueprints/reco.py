@@ -85,7 +85,8 @@ def uploadimgs():
 @reco_bp.route('/compare',methods=['POST'])
 def compare():
     try:
-        data=request.get_json('data')
+        js=request.get_json()
+        data=js.get('data')
         target_name=data.get('control')
         followup_names=data.get('tests')
         targetPath=fileUtil.getFullPath(target_name)
