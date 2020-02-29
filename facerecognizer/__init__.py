@@ -2,6 +2,7 @@ from flask import Flask
 from flask_apscheduler import APScheduler
 from facerecognizer.blueprints.admin import admin_bp
 from facerecognizer.blueprints.reco import reco_bp
+from facerecognizer.blueprints.common import common_bp
 import facerecognizer.schedule_task as scheduleTask
 import datetime
 
@@ -16,6 +17,7 @@ def create_app():
 
 
 def register_blueprints(app):
+    app.register_blueprint(common_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(reco_bp,url_prefix='/reco')
 

@@ -5,7 +5,8 @@ import math
 import traceback
 import numpy as np
 from facerecognizer.status import Status
-from facerecognizer.models.abnormal_result import AbnormalResult
+import facerecognizer.fileUtil as fileUtil 
+from facerecognizer.models.abnormal_result import BizException
 
 
 FEATURE_DB_PATH='facerecognizer/faces/feature/features2_all.csv'
@@ -26,19 +27,14 @@ face_rec = dlib.face_recognition_model_v1(WEIGHTS_PATH)
 
 
 def recognize(imgPath):
+    img,rects=getFaceRegions(imgPath)
+    if(len(rects)==0):
+        raise BizException(Status.NO_FOUND_FACE)
     persons=[]
-    try:
-        img,rects=getFaceRegions(imgPath)
-        if(len(rects)==0):
-            return AbnormalResult(Status.NO_FOUND_FACE,'not found face region')
-        for i in range(len(rects)):
-            feature=return_128d_features(img,rects[i])
-            person=getDistances(feature)
-            persons.append(person)
-    except Exception as ex:
-        print(ex.args)
-        print(traceback.format_exc())
-        return AbnormalResult(Status.INTERNAL_ERROR,ex.args)
+    for i in range(len(rects)):
+        feature=return_128d_features(img,rects[i])
+        person=getDistances(feature)
+        persons.append(person)
     return persons
 # 截取人脸区域，并保存到文件
 def getFaceRegions(imgPath):
@@ -82,28 +78,25 @@ def getDistances(feature):
     else:
         return {'name':retName,'distance':minDistance}
 
-def compare(targetPath,followupPaths):
-    try:
-        targetFeatures=getimageFeatures(targetPath)
-        if(targetFeatures==None):
-            return AbnormalResult(Status.NO_FOUND_FACE,'not found control face')
-        results=[]
-        for followupPath in followupPaths:
-            followupFeatures=getimageFeatures(followupPath)
-            if(followupFeatures==None):
-                results.append({'score':-1})
-                continue       
-            minDistance=math.inf
-            for feat1 in targetFeatures:
-                for feat2 in followupFeatures:
-                    distance=calcDistance(feat1,feat2)
-                    minDistance=distance if distance<minDistance else minDistance
-            similarity=getSimilarity(minDistance)
-            results.append({'score':similarity})
-    except Exception as ex:
-        print(ex.args)
-        print(traceback.format_exc())
-        return AbnormalResult(Status.INTERNAL_ERROR,ex.args)
+def compare(targetPath,followup_names):
+    followupPaths=[fileUtil.getFullPath(followup_name) for followup_name in followup_names]
+    targetFeatures=getimageFeatures(targetPath)
+    if(targetFeatures==None):
+        raise BizException(Status.NO_FOUND_FACE)
+    results=[]
+    for i,followupPath in enumerate(followupPaths):
+        followup_name=followup_names[i]
+        followupFeatures=getimageFeatures(followupPath)
+        if(followupFeatures==None):
+            results.append({'imgname':followup_name,'score':-1})
+            continue       
+        minDistance=math.inf
+        for feat1 in targetFeatures:
+            for feat2 in followupFeatures:
+                distance=calcDistance(feat1,feat2)
+                minDistance=distance if distance<minDistance else minDistance
+        similarity=getSimilarity(minDistance)
+        results.append({'imgname':followup_name,'score':similarity})
     return results
 def getimageFeatures(imgPath):
     features=[]
