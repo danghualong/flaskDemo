@@ -1,11 +1,11 @@
-from flask import Flask
+import datetime
+from flask import Flask,jsonify
 from flask_apscheduler import APScheduler
 from facerecognizer.blueprints.admin import admin_bp
 from facerecognizer.blueprints.reco import reco_bp
-from facerecognizer.blueprints.common import common_bp
+from facerecognizer.blueprints.errors import BizException,resp_abort
 import facerecognizer.schedule_task as scheduleTask
-import datetime
-
+from facerecognizer.status import Status,CustomCode
 
 
 def create_app():
@@ -17,12 +17,19 @@ def create_app():
 
 
 def register_blueprints(app):
-    app.register_blueprint(common_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(reco_bp,url_prefix='/reco')
 
 def register_errorhandlers(app):
-    pass
+    @app.errorhandler(Exception)
+    def register_biz_exception(e):
+        if(isinstance(e,BizException)):
+            return resp_abort(e.code,e.message)
+        else:
+            print('****error****',error.args)
+            resp=jsonify({'message':Status.INTERNAL_ERROR,'code':CustomCode.UNHANDLED_ERROR_CODE})
+            resp.status_code=CustomCode.UNHANDLED_ERROR_CODE
+            return resp 
 
 def register_scheduler(app):
     scheduler=APScheduler()
@@ -32,5 +39,5 @@ def register_scheduler(app):
     scheduler.add_job('delExpiredFiles',scheduleTask.delExpiredFiles,trigger='interval',seconds=3600,next_run_time=datetime.datetime.now(),replace_existing=True)
 
 
-    
+  
     

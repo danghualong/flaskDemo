@@ -5,8 +5,8 @@ import math
 import traceback
 import numpy as np
 from facerecognizer.status import Status
-import facerecognizer.fileUtil as fileUtil 
-from facerecognizer.models.abnormal_result import BizException
+import facerecognizer.utils.fileUtil as fileUtil 
+from facerecognizer.blueprints.errors import BizException
 
 
 FEATURE_DB_PATH='facerecognizer/faces/feature/features2_all.csv'

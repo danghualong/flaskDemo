@@ -1,4 +1,5 @@
-
+from flask import jsonify
+from werkzeug.http import HTTP_STATUS_CODES
 
 class BizException(Exception):
     code=600
@@ -13,6 +14,10 @@ class BizException(Exception):
         result['message']=self.message
         result['code']=self.code
         return result
-    
-    # def __str__(self):
-    #     return {'code':self.code,'message':self.message}
+
+def resp_abort(code,message=None,**kwargs):
+    if(message==None):
+        message=HTTP_STATUS_CODES.get(code,'')
+    result=jsonify(code=code,message=message,**kwargs)
+    result.status_code=code
+    return result
